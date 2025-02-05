@@ -1,0 +1,40 @@
+/* -- BUSCAR DOCUMENTOS EN MONGODB -- */
+
+// use(): Indica a MongoDB que base de datos vamos a utilizar. Si la base de datos no existe, la crea automáticamente.
+use('sample_mflix')
+
+/* -- Buscar UN SOLO documento */
+// findOne(): Busca el primer documento que encuentre que cumpla con los criterios de búsqueda (solo devuelve 1 elemento).
+// La estructura de findOne() es la siguiente:
+// db.<nombreColeccion>.findOne({ <campo>: <valor> })
+
+// Encontrar la película con el título "The Godfather"
+db.movies.findOne({ title: "The Godfather" })
+
+// Encontrar una pelicula por su id
+db.movies.findOne({ _id: ObjectId("573a1390f29313caabcd516c") })
+
+/* -- Buscar VARIOS documentos */
+// find(): Busca todos los documentos que cumplan con los criterios de búsqueda.
+// La estructura de find() es la siguiente:
+// db.<nombreColeccion>.find({ <campo>: <valor> })
+
+// Encontrar todas las películas (equivalente a SELECT * FROM movies)
+db.movies.find()
+
+// Encontrar las 3 primeras películas
+db.movies.find().limit(3)
+
+// Traer las últimas 10 peliculas ordenadas por el title y devolver el title y el rated
+// -1: Orden descendente
+// 1: Orden ascendente
+db.movies.find({}, { title: 1, rated: 1 }).sort({ title: -1 }).limit(10)
+
+// Traer las últimas 10 peliculas ordenadas por el title y devolver el title y el rated, sin el _id
+db.movies.find({}, { title: 1, rated: 1, _id: 0 }).sort({ title: -1 }).limit(10)
+
+// Contar cuantas películas hay en la colección
+db.movies.find().count()
+
+// Contar cuantas películas hay en la colección que tengan el rated "PG"
+db.movies.find({ rated: "PG" }).count()
