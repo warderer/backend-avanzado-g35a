@@ -1,0 +1,15 @@
+/* -- Actualizar Documentos en MongoDB */
+
+use('sample_mflix')
+
+/* -- Actualizar UN SOLO documento -- */
+// updateOne(): Actualiza un solo documento que cumpla con los criterios de búsqueda (condición).
+
+// Actualizar la película con el título "The DevF Show", para que el director sea "Pedro Talavera"
+db.movies.updateOne(
+    { title: 'The DevF Show' }, // Filtro o condición (WHERE)
+    { $set: { director: 'Pedro Talavera' } } // Cambio a realizar
+)
+// $set: Es un operador de actualización que establece el valor de un campo en un documento. Si no usamos $set, e reemplazará el documento completo. Usar $set es similiar al PATCH en API Rest, si no se indica, hara un PUT por así decirlo
+
+db.movies.find({ title: 'The DevF Show' })
