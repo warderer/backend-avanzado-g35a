@@ -13,3 +13,25 @@ db.movies.updateOne(
 // $set: Es un operador de actualización que establece el valor de un campo en un documento. Si no usamos $set, e reemplazará el documento completo. Usar $set es similiar al PATCH en API Rest, si no se indica, hara un PUT por así decirlo
 
 db.movies.find({ title: 'The DevF Show' })
+
+/* -- Actualizar VARIOS documentos -- */
+// updateMany(): Actualiza varios documentos que cumplan con los criterios de búsqueda (condición).
+
+// Actualizar todas las películas que contengan el titulo "The DevF Show", para que el director sea "Pedro Talavera", el runtime sea 120 y rated sea "PG-13"
+use('sample_mflix')
+db.movies.updateMany(
+    { title: /DevF/ }, // Filtro o condición (WHERE)
+    { $set: { director: 'Pedro Talavera', runtime: 120, rated: 'PG-13' } } // Cambio a realizar
+)
+db.movies.find({ title: /DevF/ })
+
+
+/* -- Push --*/
+// $push: Es un operador de actualización que agrega un valor a un array en un documento. Si el campo no existe, $push lo creará.
+
+use('sample_mflix')
+db.movies.updateMany(
+    { title: /DevF/ }, // Filtro o condición (WHERE)
+    { $push: { actors: 'Jesenia Valentin' } } // Cambio a realizar
+)
+db.movies.find({ title: /DevF/ })
