@@ -1,0 +1,91 @@
+// 1) Traer todos los restaurantes.
+use("restaurants_sample")
+db.restaurants.find()
+
+// 2) Obtener los primeros 5 restaurantes que se encuentren en la base de datos sin ningún orden en específico.
+use("restaurants_sample")
+db.restaurants.find().limit(5)
+
+// 3) Obtener los restaurantes 6 al 10 sin ningún orden en específico.
+use("restaurants_sample")
+db.restaurants.find().skip(5).limit(5)
+
+// 4) Listar los restaurantes que hayan obtenido un score mayor a 90.
+use("restaurants_sample")
+db.restaurants.find({ "grades.score": { $gt: 90 } })
+
+// 5) Todos los restaurantes que tengan un score mayor a 80 y menor a 100.
+use("restaurants_sample")
+db.restaurants.find({ "grades.score": { $gt: 80, $lt: 100 } })
+
+// 6) Todos los restaurantes que tengan cocina "American" y al menos un score mayor a 70.
+use("restaurants_sample")
+db.restaurants.find({ cuisine: "American ", "grades.score": { $gt: 70 } })
+
+// 7) Traer sólo el primer restaurante pero sin el campo _id.
+use("restaurants_sample")
+db.restaurants.findOne({}, { _id: 0 })
+
+// 8) Traer únicamente los nombres de todos los restaurantes.
+use("restaurants_sample")
+db.restaurants.find({}, { name: 1, _id: 0 })
+
+// 9) Traer todos los restaurantes que sean de cocina 'American ' con al menos un grado de  'A' y que no sean de la ciudad Brooklyn.
+use("restaurants_sample")
+db.restaurants.find({
+  cuisine: "American ",
+  "grades.grade": "A",
+  borough: { $ne: "Brooklyn" },
+})
+
+// 10) Todos los restaurantes que su nombre empiece con 'Wil'.
+use("restaurants_sample")
+db.restaurants.find({ name: { $regex: /^Wil/ } })
+
+// 11) Todos los restaurantes de Bronx que tengan comida Americana o China.
+use("restaurants_sample")
+db.restaurants.find({
+  borough: "Bronx",
+  cuisine: { $in: ["American", "Chinese"] },
+})
+
+// 12) Todos los restaurantes de Staten Island o Queens o Bronxor Brooklyn.
+use("restaurants_sample")
+db.restaurants.find({
+  borough: { $in: ["Staten Island", "Queens", "Bronx", "Brooklyn"] },
+})
+
+// 13) Todos los restaurantes que no tengan comida americana ni china.
+use("restaurants_sample")
+db.restaurants.find({ cuisine: { $nin: ["American", "Chinese"] } })
+
+// 14) Todos los restaurantes que el día 11-08-2014 hayan tenido una calificación de A y un puntaje de 11.
+use("restaurants_sample")
+db.restaurants.find({
+  "grades.date": ISODate("2014-08-11T00:00:00Z"),
+  "grades.grade": "A",
+  "grades.score": 11,
+})
+
+// 15) Todos los nombres de los restaurantes ordenados alfabéticamente.
+use("restaurants_sample")
+db.restaurants.find({}, { name: 1, _id: 0 }).sort({ name: 1 })
+
+// 16) Todos los restaurantes que tengan dirección.
+use("restaurants_sample")
+db.restaurants.find({ address: { $exists: true } })
+
+// 17) Los 10 mejores restaurantes ordenados por el promedio de sus puntajes (score).
+use("restaurants_sample")
+db.restaurants.aggregate([
+  { $unwind: "$grades" },
+  {
+    $group: {
+      _id: "$_id",
+      name: { $first: "$name" },
+      averageScore: { $avg: "$grades.score" },
+    },
+  },
+  { $sort: { averageScore: -1 } },
+  { $limit: 10 },
+])
