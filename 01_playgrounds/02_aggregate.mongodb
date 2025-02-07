@@ -1,0 +1,53 @@
+/* -- Aggregations en MongoDB */
+// Son operaciones que procesan documentos y devuelven un resultado calculado. Se pueden realizar operaciones de agrupación, filtrado, ordenación, etc. Esto es equivalente a las operaciones GROUP BY, HAVING, ORDER BY, etc. en SQL.
+
+use('sample_mflix')
+
+// Contar las peliculas por cada rating existente
+db.movies.aggregate([
+    {
+        $group: {
+            _id: "$rated",
+            count: { $sum: 1 }
+        }
+    }
+])
+
+/* Aggregation Pipeline */
+// Un pipeline es una lista de operaciones que MongoDB ejecuta en orden. Cada operación toma los resultados de la operación anterior y los pasa a la siguiente. El resultado final es el resultado de la última operación en el pipeline.
+
+use('sample_mflix')
+db.movies.aggregate([
+    // Etapa 1: Agrupar por el campo "rated" y contar cuantas películas hay en cada grupo
+    {
+        $group: {
+            _id: "$rated",
+            count: { $sum: 1 }
+        }
+    },
+    // Etapa 2: Ordenar por el campo "rated" de forma descendente
+    {
+        $sort: { count: -1 } // -1: Orden descendente, 1: Orden ascendente
+    }
+])
+
+// Ejemplo de pipeline con más etapas
+// Filtrar las películas que tengan un rating "PG-13", luego desagrupar el arreglo de director y unir con la colección de comments por el campo movie_id
+
+use('sample_mflix')
+
+db.movies.aggregate([
+    { $match: { rated: "PG-13"} }, // Filtro por Rated
+    { $unwind: "$directors" }, // Desagrupar el arreglo de directors
+    { $lookup: { // Unir con la colección de comments (JOIN)
+        from: "comments",
+        localField: "_id",
+        foreignField: "movie_id",
+        as: "comments"
+    } },
+    { $project: { // Mostrar solo los campos que nos interesan
+        title: 1,
+        directors: 1,
+        comments: 1
+    } }
+])
