@@ -31,11 +31,21 @@ const getCarById = async (req, res) => {
 }
 
 // UPDATE
+const updateCarById = async (req, res) => {
+  try {
+    const updatedCar = await Car.findByIdAndUpdate(req.params.carId, req.body, { new: true }) // { new: true } para que devuelva el documento actualizado, en caso contrario devuelve el documento antes de actualizar.
+    if (!updatedCar) return res.status(404).json({ message: 'Car not found' })
+    res.status(200).json(updatedCar)
+  } catch (error) {
+    res.status(400).json({ message: 'Error Updating Car', error })
+  }
+}
 
 // DELETE
 
 export {
   createCar,
   getAllCars,
-  getCarById
+  getCarById,
+  updateCarById
 }
