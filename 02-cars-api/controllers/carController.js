@@ -13,7 +13,7 @@ const createCar = async (req, res) => {
 // READ
 const getAllCars = async (req, res) => {
   try {
-    const cars = await Car.find()
+    const cars = await Car.find({ isActive: true }) // isActive: true -> Para hacer funcionar el borrado lógico.
     // const cars = await Car.find({}, { plate: 1, year: 1, model: 1, brand: 1 }) // Con proyecciones, para elegir solamente ciertos campos.
     res.status(200).json(cars)
   } catch (error) {
@@ -23,7 +23,7 @@ const getAllCars = async (req, res) => {
 
 const getCarById = async (req, res) => {
   try {
-    const car = await Car.findById(req.params.carId)
+    const car = await Car.find({ _id: req.params.carId, isActive: true }) // isActive: true -> Para hacer funcionar el borrado lógico.
     res.status(200).json(car)
   } catch (error) {
     res.status(400).json({ message: error.message })
@@ -42,10 +42,32 @@ const updateCarById = async (req, res) => {
 }
 
 // DELETE
+const deleteCarById = async (req, res) => {
+  // Borrado Físico: Voy a comprobar si existe un query string llamado 'destroy' y si su valor es 'true', voy a borrar el documento(registro) de la base de datos. /?destroy=true
+  if (req.query.destroy === 'true') {
+    try {
+      const deletedCar = await Car.findByIdAndDelete(req.params.carId)
+      if (deletedCar === null) return res.status(404).json({ message: 'Cannot Delete: Car not found' })
+      return res.status(204).json()
+    } catch (error) {
+      res.status(400).json({ message: 'Error Deleting Car', error })
+    }
+  }
+
+  // Borrado Lógico: Cambio el estaod de isActive a false (Update -> findByIdAndUpdate)
+  try {
+    const updatedCar = await Car.findByIdAndUpdate(req.params.carId, { isActive: false }, { new: false })
+    if (updatedCar === null || updatedCar.isActive === false) return res.status(404).json({ message: 'Cannot Delete: Car not found' })
+    return res.status(204).json()
+  } catch (error) {
+    res.status(400).json({ message: 'Error Deleting Car', error })
+  }
+}
 
 export {
   createCar,
   getAllCars,
   getCarById,
-  updateCarById
+  updateCarById,
+  deleteCarById
 }
