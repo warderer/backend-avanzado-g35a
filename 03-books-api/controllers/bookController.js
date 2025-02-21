@@ -100,10 +100,40 @@ const updateBookById = async (req, res) => {
 }
 
 // DELETE
+const deleteBookById = async (req, res) => {
+  if (!req.params.bookId.match(/^[0-9a-fA-F]{24}$/)) {
+    return res.status(400).json({ message: 'El ID del libro no es válido' })
+  }
+  // HARD DELETE: Borrado físico de la base de datos
+  // Si recibo el query param ?destroy=true, borro el libro de la base de datos.
+  if (req.query.destroy === 'true') {
+    try {
+      const book = await Book.findByIdAndDelete(req.params.bookId)
+      if (!book) {
+        return res.status(404).json({ message: 'No se encontró el libro con el id especificado' })
+      }
+      return res.status(204).end()
+    } catch (error) {
+      res.status(400).json({ message: error.message })
+    }
+  }
+  // SOFT DELETE: Cambiar el estado de isActive a false (update)
+  try {
+    const book = await Book
+      .findByIdAndUpdate(req.params.bookId, { isActive: false }, { new: false })
+    if (!book || !book.isActive) {
+      return res.status(404).json({ message: 'Error al eliminar: No se encontró el libro con el id especificado' })
+    }
+    return res.status(204).end()
+  } catch (error) {
+    res.status(400).json({ message: error.message })
+  }
+}
 
 export {
   createBook,
   getAllBooks,
   getBookById,
-  updateBookById
+  updateBookById,
+  deleteBookById
 }
