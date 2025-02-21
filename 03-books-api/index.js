@@ -14,8 +14,9 @@ morgan.token('type', function (req, res) { return req.headers['content-type'] })
 morgan.token('body', req => JSON.stringify(req.body))
 morgan.token('hostname', req => req.hostname)
 morgan.token('query', req => JSON.stringify(req.query))
+morgan.token('ip', req => req.ip)
 
-app.use(morgan(':hostname :status :method :url :type :body :query - :response-time ms'))
+app.use(morgan(':hostname :status :method :url :type :body :query - :response-time ms - :ip'))
 
 // Aquí van las rutas
 app.use('/api/v1/books', bookRoutes)
