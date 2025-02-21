@@ -80,11 +80,30 @@ const getBookById = async (req, res) => {
 }
 
 // UPDATE
+const updateBookById = async (req, res) => {
+  // Valido que el ID sea un ObjectId válido (24 caracteres alfanumericos en hexadecimal)
+  if (!req.params.bookId.match(/^[0-9a-fA-F]{24}$/)) {
+    return res.status(400).json({ message: 'El ID del libro no es válido' })
+  }
+
+  try {
+    const book = await Book
+      .findByIdAndUpdate(req.params.bookId, req.body, { new: true })
+      .populate('authors', 'firstName lastName bio birthDate')
+    if (!book) {
+      return res.status(404).json({ message: 'Error al actualizar, no se encontró el libro con el id especificado' })
+    }
+    res.status(200).json(book)
+  } catch (error) {
+    res.status(400).json({ message: error.message })
+  }
+}
 
 // DELETE
 
 export {
   createBook,
   getAllBooks,
-  getBookById
+  getBookById,
+  updateBookById
 }
