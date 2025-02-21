@@ -5,6 +5,22 @@ import Book from '../models/Book.js'
 const createBook = async (req, res) => {
   const bookData = req.body
 
+  // VALIDACIONES
+  // Validar que el body no venga vacío.
+  if (Object.keys(bookData).length === 0) {
+    return res.status(400).json({ message: 'No se recibió información' })
+  }
+
+  // Validar que Authors sea un arreglo
+  if (!Array.isArray(bookData.authors)) {
+    return res.status(400).json({ message: 'Authors debe ser un arreglo' })
+  }
+
+  // Validar que Authors tenga al menos un autor
+  if (bookData.authors.length === 0) {
+    return res.status(400).json({ message: 'El libro debe contener al menos un autor' })
+  }
+
   // Crear autores, uno por uno y esperar a que todos se hayan creado en la colección de Authors
   try {
     const authorsModels = await Promise.all(
