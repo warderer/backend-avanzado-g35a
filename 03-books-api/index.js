@@ -1,6 +1,7 @@
 import express from 'express'
 import { connect } from './config/database.js'
 import bookRoutes from './routes/bookRoutes.js'
+import authRoutes from './routes/authRoutes.js'
 import morgan from 'morgan'
 
 const PORT = process.env.PORT || 3000
@@ -20,6 +21,7 @@ app.use(morgan(':hostname :status :method :url :type :body :query - :response-ti
 
 // Aquí van las rutas
 app.use('/api/v1/books', bookRoutes)
+app.use('/api/v1', authRoutes)
 
 // Levantar el servidor
 connect().then(() => {
