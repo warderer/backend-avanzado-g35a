@@ -1,6 +1,7 @@
 /* eslint-disable camelcase */
 import User from '../models/User.js'
 import bcrypt from 'bcrypt'
+import jwt from 'jwt-simple'
 
 // Registrar un nuevo usuario: Register
 const register = async (req, res) => {
@@ -31,7 +32,52 @@ const register = async (req, res) => {
 }
 
 // Iniciar sesión: Login
+const login = async (req, res) => {
+  // Validar que el email y el password vengan en el body
+  const { email, password } = req.body
+  if (!email || !password) {
+    return res.status(400).json({ message: 'email and password are required' })
+  }
+
+  try {
+    // Buscar el usuario proprorcionado en la base de datos
+    const user = await User.findOne({ email })
+    if (!user) {
+      return res.status(400).json({ message: 'Invalid email or password' })
+    }
+
+    // Si el correo existe, entonces comparamos la contraseña proporcionada con la contraseña almacenada en la base de datos
+
+    const isValidPassword = await bcrypt.compare(
+      password, user.password
+    ) // Esto devuelve un booleano - true o false
+
+    if (!isValidPassword) {
+      return res.status(400).json({ message: 'Invalid email or password' })
+    }
+
+    // Si el correo existe y la contraseña es correcta, entonces generaremos un token de autenticación (JWT)
+
+    // Construimos el payload del token
+    const payload = {
+      _id: user._id,
+      email: user.email,
+      role: user.role,
+      iat: Math.floor(Date.now() / 1000), // Fecha de emisión del token
+      exp: Math.floor(Date.now() / 1000 + (60 * 60 * 24 * 7)) // Fecha de expiración del token
+    }
+
+    // Construyo el token con el método encode de jwt-simple y la clave se creta
+    const token = jwt.encode(payload, process.env.JWT_SECRET)
+
+    // Devolvemos el token al cliente
+    return res.status(200).json({ token })
+  } catch (error) {
+    return res.status(500).json({ message: error.message })
+  }
+}
 
 export {
-  register
+  register,
+  login
 }
